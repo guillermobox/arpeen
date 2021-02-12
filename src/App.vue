@@ -140,7 +140,8 @@ body {
 }
 div {
   font-size: 32px;
-  width: 21ch;
+  width: 20ch;
+  padding: 0;
   line-height: 1.2em;
   text-align: right;
   font-family: "IBM Plex Mono", monospace;
