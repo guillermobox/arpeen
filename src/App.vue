@@ -38,43 +38,51 @@ export default {
     prettyPrint: function (number) {
       return display(number, maxlength);
     },
-    keypressed: function (ev) {
-      let value = ev.key;
-      if (
-        value >= "0" &&
-        value <= "9" &&
-        this.inputfield.length < maxlength - 1
-      ) {
-        this.inputfield += value;
-      } else if (value == ".") {
-        if (
-          !isNaN(Number(this.inputfield + ".")) &&
-          this.inputfield.length < maxlength
-        )
-          this.inputfield += ".";
-      } else if (value == "Backspace") {
-        if (this.inputfield !== "")
-          this.inputfield = this.inputfield.slice(0, -1);
-        else this.stack.pop();
-      } else if (value == "Enter") {
-        if (this.inputfield !== "" && !isNaN(Number(this.inputfield))) {
-          this.stack.push(new Decimal(this.inputfield));
-          this.inputfield = "";
-        }
-      } else if (value == "Tab") {
-        if (this.stack.length > 1) {
-          let x = this.stack.pop();
-          let y = this.stack.pop();
-          this.stack.push(x);
-          this.stack.push(y);
-        }
-      } else if ("+-*/".includes(value)) {
-        this.binaryOperation(value);
-      } else {
-        return;
+    pushToDisplay: function (char) {
+      const newfield = this.inputfield + char;
+      if (newfield.length < maxlength && !isNaN(Number(newfield))) {
+        this.inputfield = newfield;
       }
-      ev.preventDefault();
-      ev.stopPropagation();
+    },
+    drop: function () {
+      if (this.inputfield !== "") this.inputfield = "";
+      else this.stack.pop();
+    },
+    push: function () {
+      if (this.inputfield !== "" && !isNaN(Number(this.inputfield))) {
+        this.stack.push(new Decimal(this.inputfield));
+        this.inputfield = "";
+      }
+    },
+    switch: function () {
+      if (this.stack.length > 1) {
+        let x = this.stack.pop();
+        let y = this.stack.pop();
+        this.stack.push(x);
+        this.stack.push(y);
+      }
+    },
+    keypressed: function (ev) {
+      if (this.dispatchAction(ev.key)) {
+        ev.preventDefault();
+        ev.stopPropagation();
+      }
+    },
+    dispatchAction: function (action) {
+      if ("0123456789.".includes(action)) {
+        this.pushToDisplay(action);
+      } else if ("+-*/".includes(action)) {
+        this.binaryOperation(action);
+      } else if (action == "Backspace") {
+        this.drop();
+      } else if (action == "Enter") {
+        this.push();
+      } else if (action == "Tab") {
+        this.switch();
+      } else {
+        return false;
+      }
+      return true;
     },
     pushOrFail: function () {
       if (this.inputfield === "") return true;
