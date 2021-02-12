@@ -6,7 +6,7 @@ function display(decimal, maxlength) {
     if (repr.length + 1 <= maxlength) return sign + repr;
 
     repr = d.toPrecision(maxlength - 1);
-    if (!repr.includes('e')) return sign + repr;
+    if (!repr.includes('e') && repr.length + 1 <= maxlength) return sign + repr;
 
     const precision = maxlength - 5 - Math.abs(decimal.e).toString().length;
     return sign + d.toExponential(precision);
